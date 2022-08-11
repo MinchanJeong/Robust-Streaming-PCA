@@ -1,0 +1,1 @@
+place ./csv/ here. (https://www.kaggle.com/datasets/paultimothymooney/stock-market-data)
