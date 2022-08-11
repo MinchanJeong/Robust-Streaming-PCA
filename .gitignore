@@ -1,0 +1,10 @@
+*.png
+*.npy
+*.pickle
+*.pyc
+
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+.__pycache__
+*/.__pycache__/*
