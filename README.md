@@ -2,7 +2,7 @@
 
 Implementation of the paper Robust Streaming PCA (https://openreview.net/forum?id=dAZdQM32IoK ; NeurIPS 2022).
 
-You can reproduce the each figure by running source file in eacn directory and accessing to jupyter notebook.
+You can reproduce the each figure by running source file in each directory and accessing to jupyter notebook.
 
 For example: To reproduce Figure 1-(a),
 ```
