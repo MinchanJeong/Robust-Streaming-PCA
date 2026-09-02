@@ -1,5 +1,6 @@
 numba 
 numpy 
 matplotlib 
-scikit-learn 
+scikit-learn
+pandas
 tqdm

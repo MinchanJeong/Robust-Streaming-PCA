@@ -11,3 +11,6 @@
 
 .__pycache__
 */.__pycache__/*
+
+# Source CSVs for the S&P500 stream; see real_data/datasets/sp500/readme.txt
+real_data/datasets/sp500/csv/

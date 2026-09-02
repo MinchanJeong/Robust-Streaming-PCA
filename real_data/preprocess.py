@@ -33,3 +33,7 @@ df_total2 = df_total[ii:ff].dropna(axis=1, how='any').reset_index(drop=True)
 arr = df_total2.drop(['Date'], axis=1).values.T
 print(arr.shape)
 np.save('./datasets/sp500',arr)
+
+# The trading dates of the retained columns, in the same order, so that a
+# reading taken per window can be placed on a time axis.
+np.save('./datasets/sp500_dates',df_total2['Date'].values)
