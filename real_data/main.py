@@ -16,7 +16,7 @@ testwindow = 500
 
 k = 3
 
-B_list = np.unique(np.asarray(np.power(10,np.linspace(start = 0, stop = 3.2, num = 400)),dtype=np.int))#400
+B_list = np.unique(np.asarray(np.power(10,np.linspace(start = 0, stop = 3.2, num = 400)),dtype=int))#400
 zeta_list = np.power(10,np.linspace(start = 2.5, stop = -3.5, num = 200))#200 2.5 ~ -1.5
     
 #### Argparse ############################################################
