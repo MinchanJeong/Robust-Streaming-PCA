@@ -11,3 +11,7 @@ source noisy.sh
 source oja.sh
 ```
 and run the provided `mainplot_fig1a.ipynb`.
+
+The drift estimation of Appendix I, which reads the per-step budget and the
+spectral gap off the S&P500 stream, is in `real_data/drift_estimation/`; see the
+README there.
