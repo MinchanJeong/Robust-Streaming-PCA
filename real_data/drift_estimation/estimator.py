@@ -54,6 +54,19 @@ def truncated(k):
     return lambda X: signal_part(X, k)
 
 
+def crossfit_stat(A, B, project):
+    """The cross-fit reading on one window pair: the two halves' inner product."""
+    d1 = project(A[:, 0::2]) - project(B[:, 0::2])
+    d2 = project(A[:, 1::2]) - project(B[:, 1::2])
+    return float(np.sum(d1 * d2))
+
+
+def plugin_stat(A, B, project):
+    """The plug-in reading on one window pair: one difference, squared."""
+    d = project(A) - project(B)
+    return float(np.sum(d * d))
+
+
 def crossfit_q(stream, w, project):
     """Q_hat_l for every consecutive length-w window pair.
 
@@ -62,22 +75,20 @@ def crossfit_q(stream, w, project):
     full second moment.
     """
     T = stream.shape[1]
-    out = []
-    for (a0, a1), (b0, b1) in window_pairs(T, w):
-        A, B = stream[:, a0:a1], stream[:, b0:b1]
-        d1 = project(A[:, 0::2]) - project(B[:, 0::2])
-        d2 = project(A[:, 1::2]) - project(B[:, 1::2])
-        out.append(float(np.sum(d1 * d2)))
-    return np.array(out)
+    return np.array([
+        crossfit_stat(stream[:, a0:a1], stream[:, b0:b1], project)
+        for (a0, a1), (b0, b1) in window_pairs(T, w)
+    ])
 
 
-def permutation_null(stream, w, project, nperm, rng):
+def permutation_null(stream, w, project, nperm, rng, statistic=None):
     """Q_hat_l with the two windows' observations pooled and reshuffled.
 
     Destroys the ordering that carries the drift while leaving the sampling
     behaviour of the estimator intact, so the average over permutations is what
     Q_hat_l reads on a stream with the same spectrum and no drift.
     """
+    statistic = crossfit_stat if statistic is None else statistic
     T = stream.shape[1]
     out = []
     for (a0, a1), (b0, b1) in window_pairs(T, w):
@@ -85,10 +96,7 @@ def permutation_null(stream, w, project, nperm, rng):
         acc = []
         for _ in range(nperm):
             q = pool[:, rng.permutation(2 * w)]
-            A0, B0 = q[:, :w], q[:, w:]
-            e1 = project(A0[:, 0::2]) - project(B0[:, 0::2])
-            e2 = project(A0[:, 1::2]) - project(B0[:, 1::2])
-            acc.append(float(np.sum(e1 * e2)))
+            acc.append(statistic(q[:, :w], q[:, w:], project))
         out.append(np.mean(acc))
     return np.array(out)
 
@@ -105,13 +113,32 @@ def bootstrap_ci(q, rng, nboot=1500, alpha=0.05):
     return tuple(np.quantile(draws, [alpha / 2, 1 - alpha / 2]))
 
 
+def spectral_gaps(stream, w, kmax):
+    """delta_hat = s_k(Sigma_hat_l) - sigma2_hat, per length-w window, per k."""
+    T = stream.shape[1]
+    idx = [(T % w + i * w, T % w + (i + 1) * w) for i in range(T // w)]
+    lams = [np.linalg.eigvalsh(sample_covariance(stream[:, a:b]))[::-1] for a, b in idx]
+    return {k: np.array([l[k - 1] - l[k:].mean() for l in lams]) for k in range(1, kmax + 1)}
+
+
 def spectral_gap(stream, w, kmax):
-    """delta_hat = s_k(Sigma_hat_l) - sigma2_hat, minimised over length-w windows.
+    """The reported delta_hat: the minimum over length-w windows.
 
     Definition 1 asks for the gap to hold at every t, so the reported figure is
     the minimum over windows rather than the average.
     """
+    return {k: float(v.min()) for k, v in spectral_gaps(stream, w, kmax).items()}
+
+
+def plugin_sq(stream, w, project):
+    """||Delta_hat_l||_F^2 read from the whole window, the estimator to avoid.
+
+    Squares one estimate instead of pairing two, so its expectation carries the
+    sampling error E||Z_l||_F^2 on top of the drift.  Kept here to measure that
+    floor rather than to use it.
+    """
     T = stream.shape[1]
-    idx = [(T % w + i * w, T % w + (i + 1) * w) for i in range(T // w)]
-    lams = [np.linalg.eigvalsh(sample_covariance(stream[:, a:b]))[::-1] for a, b in idx]
-    return {k: min(l[k - 1] - l[k:].mean() for l in lams) for k in range(1, kmax + 1)}
+    return np.array([
+        plugin_stat(stream[:, a0:a1], stream[:, b0:b1], project)
+        for (a0, a1), (b0, b1) in window_pairs(T, w)
+    ])

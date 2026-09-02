@@ -2,7 +2,7 @@
 
 Reproduces the table of Appendix I: Q_hat_l^{1/2} averaged over consecutive
 length-w window pairs with the implied budget Gamma_hat(w) = Q_hat_l^{1/2} / w,
-and delta_hat per k minimised over the length-200 windows the budget is read on.
+and delta_hat per k minimized over the length-200 windows the budget is read on.
 
 Both constants are read at the same window length, w = 200: Definition 1 gives
 Gamma >= ||Delta_l||_op / w at every w, so each window length yields a lower
@@ -18,7 +18,7 @@ import os
 import numpy as np
 
 from estimator import (bootstrap_ci, crossfit_q, permutation_null, resolve,
-                       spectral_gap, truncated)
+                       spectral_gaps, truncated)
 
 DATA = os.path.join("..", "datasets", "sp500.npy")
 WS = [100, 200, 500, 1000]
@@ -47,12 +47,14 @@ def main():
         print(f"{w:6d} {len(q):6d} {int((q <= 0).sum()):7d} {est:9.4f} "
               f"[{lo:9.4f},{hi:9.4f}] {est/w:13.2e} {resolve(nul):11.2e}")
 
-    print(f"\nSPECTRAL GAP (minimum over length-{W_READ} windows)")
-    gaps = spectral_gap(stream, W_READ, max(KS))
-    print(f"{'k':>3} {'delta_hat':>11} {'Gamma_hat(200)/delta_hat':>25} {'Def. 1':>9}")
+    print(f"\nSPECTRAL GAP (minimum over length-{W_READ} windows; median for scale)")
+    gaps = spectral_gaps(stream, W_READ, max(KS))
+    print(f"{'k':>3} {'delta_hat':>11} {'median':>11} {'Gamma_hat(200)/delta_hat':>25} {'Def. 1':>9}")
     for k in KS:
-        r = budget[W_READ] / gaps[k]
-        print(f"{k:3d} {gaps[k]:11.2e} {r:25.2f} {'ok' if r < 1 else 'VIOLATED':>9}")
+        lo = float(gaps[k].min())
+        r = budget[W_READ] / lo
+        print(f"{k:3d} {lo:11.2e} {np.median(gaps[k]):11.2e} {r:25.2f} "
+              f"{'ok' if r < 1 else 'VIOLATED':>9}")
 
 
 if __name__ == "__main__":
