@@ -4,7 +4,7 @@ Code for **Robust Streaming PCA** (NeurIPS 2022).
 
 [arXiv:1902.03223](https://arxiv.org/abs/1902.03223) | [OpenReview](https://openreview.net/forum?id=dAZdQM32IoK) | [NeurIPS proceedings](https://proceedings.neurips.cc/paper_files/paper/2022/file/1b11d918b08f781a6c194c6c522edfd6-Paper-Conference.pdf)
 
-> **The arXiv version is the 2026 revision**, newer than the proceedings paper. It adds, among other things, the drift-estimation study of Appendix I, implemented here in [`real_data/drift_estimation/`](real_data/drift_estimation/).
+> **The [arXiv version](https://arxiv.org/abs/1902.03223) supersedes the proceedings paper.** The 2026 revision corrects and expands the proofs, and replaces the earlier drift reading on S&P500 with a calibrated estimator ([`real_data/drift_estimation/`](real_data/drift_estimation/)).
 
 ## What the paper studies
 
